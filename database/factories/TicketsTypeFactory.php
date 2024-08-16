@@ -20,8 +20,8 @@ class TicketsTypeFactory extends Factory
             'event_id' => $this->faker->randomElement([1,2,3]),
             'name' => $this->faker->randomElement(['VIP', 'Free', 'Middle']),
             'price' => 1000,
-            'quantity' => 5,
-            'real_quantity' => 10,
+            'quantity' => 15,
+            'real_quantity' => 15,
             'total_quantity' => 15,
             'description' => "short description",
         ];

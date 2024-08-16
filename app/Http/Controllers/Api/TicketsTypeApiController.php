@@ -12,99 +12,41 @@ use Illuminate\Http\Request;
 
 class TicketsTypeApiController extends Controller
 {
-      /**
-     * @OA\Get(
-     *     path="/events/ticket/types/:event_id",
-     *     operationId="index",
-     *     tags={"TicketsType By Event"},
-     *     summary="Get List Of TicketsType By Event",
-     *     description="Returns a paginated list of available tickets type by Event.",
-     *     @OA\Parameter(
-     *         name="page",
-     *         in="query",
-     *         description="The page number to retrieve.",
-     *         required=false,
-     *         @OA\Schema(
-     *             type="integer",
-     *             default=1
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         description="The number of events per page.",
-     *         required=false,
-     *         @OA\Schema(
-     *             type="integer",
-     *             default=10
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     type="object",
-     *                     @OA\Property(property="id", type="integer", example=2),
-     *                     @OA\Property(property="name", type="string", example="VIP"),
-     *                     @OA\Property(property="price", type="integer", example=15000),
-     *                     @OA\Property(property="quantity", type="integer", example=1000),
-     *                     @OA\Property(property="real_quantity", type="integer", example=950),
-     *                     @OA\Property(property="total_quantity", type="integer", example=1350),
-     *                     @OA\Property(property="description", type="string", example="Dolore atque consectetur ut numquam..."),
-     *                     @OA\Property(property="event_id", type="integer", example=3),
-     *                )
-     *             ),
-     *             @OA\Property(
-     *                 property="links",
-     *                 type="object",
-     *                 @OA\Property(property="first", type="string", format="url", example="http://localhost:8000/api/events/ticket/types/:event_id?page=1"),
-     *                 @OA\Property(property="last", type="string", format="url", example="http://localhost:8000/api/events/ticket/types/:event_id?page=50"),
-     *                 @OA\Property(property="prev", type="string", format="url", nullable=true, example=null),
-     *                 @OA\Property(property="next", type="string", format="url", example="http://localhost:8000/api/events/ticket/types/:event_id?page=2")
-     *             ),
-     *             @OA\Property(
-     *                 property="meta",
-     *                 type="object",
-     *                 @OA\Property(property="current_page", type="integer", example=1),
-     *                 @OA\Property(property="from", type="integer", example=1),
-     *                 @OA\Property(property="last_page", type="integer", example=50),
-     *                 @OA\Property(property="links", type="array",
-     *                     @OA\Items(
-     *                         type="object",
-     *                         @OA\Property(property="url", type="string", format="url", nullable=true, example=null),
-     *                         @OA\Property(property="label", type="string", example="&laquo; Previous"),
-     *                         @OA\Property(property="active", type="boolean", example=false)
-     *                     )
-     *                 ),
-     *                 @OA\Property(property="path", type="string", format="url", example="http://localhost:8000/api/events/ticket/types/:event_id"),
-     *                 @OA\Property(property="per_page", type="integer", example=2),
-     *                 @OA\Property(property="to", type="integer", example=2),
-     *                 @OA\Property(property="total", type="integer", example=100)
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Server Error",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message", type="string", example="Internal Server Error")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Not Found",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message", type="string", example="No events found")
-     *         )
-     *     )
-     * )
+    /**
+    * @OA\Get(
+    *     path="/events/ticket/types/{event_id}",
+    *     operationId="TicketsTypeApiController.index",
+    *     tags={"TicketsType By Event"},
+    *     summary="Get List Of TicketsType By Event",
+    *     description="Returns a paginated list of available tickets type by Event.",
+    *     security={{"sanctum":{}}},
+    *     @OA\Parameter(
+    *         name="event_id",
+    *         in="path",
+    *         required=true,
+    *         @OA\Schema(type="integer"),
+    *         description="ID de l'événement"
+    *     ),
+    *     @OA\Response(
+    *         response=200,
+    *         description="Successful retrieval of ticket types",
+    *        @OA\MediaType(
+     *           mediaType="application/json",
+    *         )
+    *     ),
+    *     @OA\Response(
+    *         response=404,
+    *         description="Event not found",
+    *         @OA\JsonContent(
+    *             type="object",
+    *             @OA\Property(
+    *                 property="errors",
+    *                 type="string",
+    *                 example="No query results for model [App\\Models\\Event] 1"
+    *             )
+    *         )
+    *     )
+    * )
     **/
 
     public function index(int $event_id)

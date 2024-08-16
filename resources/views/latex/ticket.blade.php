@@ -11,8 +11,8 @@
 
 \begin{document}
 
-% Ticket template
-\begin{tcolorbox}[colback=white!95!gray, colframe=blue!50!black, width=\textwidth, sharp corners, boxrule=0.5mm, title=Event Ticket]
+@foreach($tickets as $ticket)
+\begin{tcolorbox}[colback=white!95!gray, colframe=blue!50!black, width=\textwidth, sharp corners, boxrule=0.5mm, title=Ticker N {{ $ticket->key }}]
     \begin{center}
         %\includegraphics[width=0.3\textwidth]{event_logo.png} % Add your event logo here
         \vspace{0.5cm}
@@ -28,16 +28,16 @@
         \hspace{4cm} \= \hspace{6cm} \= \kill
         \textbf{Email:} \> {{ $ticket->email }} \\
         \textbf{Phone:} \> {{ $ticket->phone }} \\
-        \textbf{Ticket Type:} \> {{ $ticket_type->name }} \\
+        \textbf{Ticket Type:} \> {{ $ticket->ticketType->name }} \\
         \textbf{Price:} \> {{ $ticket->price }} XOF\\
-        \textbf{Ticket Key:} \> {{ $ticket->key }} \\
         \textbf{Status:} \> {{ $ticket->status }} \\
         \textbf{Order ID:} \> {{ $order->number }} \\
-        \textbf{Created On:} \> {{ $ticket->created_on }}
+        %\textbf{Created On:} \> {{ $ticket->created_on }}
     \end{tabbing}
 
     \vspace{0.5cm}
 
 \end{tcolorbox}
+@endforeach
 
 \end{document}

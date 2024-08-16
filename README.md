@@ -4,7 +4,7 @@
 
 - Clone repository
 
-`git clone ...`
+`git clone https://github.com/amk-7/tikerama_test_technique.git`
 
 - Duplicate .env.example to .env
 
@@ -32,7 +32,7 @@
 - Run Php Laravel migration and seeder
 
 `php artisan migrate`
-`php artisan db.seed`
+`php artisan db:seed`
 
 
 - Run Php Laravel server
@@ -59,21 +59,27 @@ data example :
 ```
 
 - Logout to api
+
 `POST /logout`
 
 - Api documentation 
+
 `GET /documentation`
 
 - Consult the list of all events with pagination.
+
 `GET /events`
 
 - Consult the list of current events with pagination.
+
 `GET /events/upcoming`
 
 - Consult the list of ticket types available for a given event
+
 `GET /events/ticket/types/{event_id}`
 
 - Create a new intent order.
+
 `POST /orders/intent`
 
 data example :
@@ -90,8 +96,36 @@ data example :
 - validate an order intention : La réponse inclura une URL pour télécharger
 les tickets de la commande.
 
-- consulter toutes les commandes effectuées par le client (utilisateur de
-l’API) : Pagination incluse et modification de la base de données pour intégrer cette
-fonctionnalité.
+`/orders/validate/{order_intent_id}/{event_id}`
 
+data example :
+```code 
+{
+    "payment": "Credit Card",
+    "info": "Commande pour 2 tickets VIP",
+    "tickets": [
+        {
+            "email": "johndoe@example.com",
+            "phone": "+33612345678",
+            "ticket_type_id": 1
+        },
+        {
+            "email": "johndoe@example.com",
+            "phone": "+33612345678",
+            "ticket_type_id": 2
+        },
+        {
+            "email": "johndoe@example.com",
+            "phone": "+33612345678",
+            "ticket_type_id": 3
+        }
+    ]
+}
+```
+
+
+- consulter toutes les commandes effectuées par le client (utilisateur de
+l’API) 
+
+`/user/orders`
 

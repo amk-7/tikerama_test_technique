@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Constants\HttpStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\OrderResource;
 use App\Models\Event;
 use App\Models\Order;
 use App\Models\OrdersIntent;
@@ -20,11 +21,45 @@ use Mockery\Matcher\Type;
 class OrderApiController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
+     * @OA\Get(
+     *     path="/orders",
+     *     operationId="OrderApiController.index",
+     *     summary="Get list of current user's orders",
+     *     tags={"Orders"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of user's orders",
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *       )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden"
+     *     ),
+     * )
+    **/
+    public function index(Request $request)
     {
-        //
+        $perPage = 10;
+
+        // On récupère les commande
+        $current_user_orders = $request->user()->orders()->paginate($perPage);
+
+        // On retourne les commande en utilisant une ressource
+        return OrderResource::collection($current_user_orders);
     }
 
     /**
@@ -36,29 +71,65 @@ class OrderApiController extends Controller
     }
 
     /**
-     * @OA\Get(
-     *     path="/events/upcoming",
-     *     operationId="indexUpcoming",
-     *     tags={"Events"},
-     *     summary="Récupérer tous les évenement en cours",
-     *     description="Retourne une liste d'évenements en cours ordonnée par date dans l'order  décroissant.",
-     *     @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *          @OA\MediaType(
-     *           mediaType="application/json",
-     *          )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Server Error",
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Not Found",
-     *     )
-     * )
+         * @OA\Post(
+         *     path="/orders/validate/{order_intent_id}/{event_id}",
+         *     operationId="OrderApiController.store",
+         *     summary="Validate an intent order",
+         *     tags={"Validate an intent order"},
+         *     security={{"sanctum":{}}},
+         *     @OA\Parameter(
+         *         name="order_intent_id",
+         *         in="path",
+         *         description="ID of the order intent",
+         *         required=true,
+         *         @OA\Schema(type="integer")
+         *     ),
+         *     @OA\Parameter(
+         *         name="event_id",
+         *         in="path",
+         *         description="ID of the event",
+         *         required=true,
+         *         @OA\Schema(type="integer")
+         *     ),
+         *     @OA\RequestBody(
+         *         required=true,
+         *      ),
+         *     @OA\Response(
+         *         response=201,
+         *         description="Order created successfully",
+         *         @OA\JsonContent(
+         *             type="object",
+         *             @OA\Property(property="message", type="string", example="Order created successfully"),
+         *             @OA\Property(property="tickets_url", type="string", example="/storage/public/pdf/12345.pdf")
+         *         )
+         *     ),
+         *     @OA\Response(
+         *         response=400,
+         *         description="Bad Request - Validation errors",
+         *         @OA\JsonContent(
+         *             type="object",
+         *             @OA\Property(property="errors", type="object")
+         *         )
+         *     ),
+         *     @OA\Response(
+         *         response=404,
+         *         description="Not Found - Order intent or event not found",
+         *         @OA\JsonContent(
+         *             type="object",
+         *             @OA\Property(property="errors", type="string")
+         *         )
+         *     ),
+         *     @OA\Response(
+         *         response=500,
+         *         description="Internal Server Error - Exception occurred",
+         *         @OA\JsonContent(
+         *             type="object",
+         *             @OA\Property(property="errors", type="string")
+         *         )
+         *     ),
+         * )
     **/
+
     public function store(Request $request, int $order_intent_id, int $event_id)
     {
         
@@ -91,7 +162,7 @@ class OrderApiController extends Controller
                 'tickets' => 'required|array',
                 'tickets.*.email' => 'required|email|max:255',
                 'tickets.*.phone' => 'required|string|max:20',
-                'tickets.*.price' => 'required|numeric',
+                'tickets.*.ticket_type_id' => 'required|integer|exists:tickets_types,id',
             ]
         );
 
@@ -116,6 +187,7 @@ class OrderApiController extends Controller
                 'info' => $validated_data['info'],
                 'event_id' => $event->id,
                 'number' => AppServices::generateOrdreNumber($id),
+                'user_id' => $request->user()->id,
             ]);
 
             
@@ -123,31 +195,36 @@ class OrderApiController extends Controller
             if (!file_exists($base_path)) {
                 mkdir($base_path, 0755, true);
             }
-            $urls = [];
+
             // On crée tous les tickets de la commande
             foreach ($validated_data['tickets'] as $ticket_data) {
                 $id = Ticket::count('id')+1;
-                $type = TicketsType::firstWhere('name', $ordersIntent->type);
-                $ticket = Ticket::create([
+                $ticket_type = TicketsType::find($ticket_data['ticket_type_id']);
+                Ticket::create([
                     'email' => $ticket_data['email'],
                     'phone' => $ticket_data['phone'],
-                    'price' => $ticket_data['price'],
+                    'price' => $ticket_type->price,
                     'key' => AppServices::generateTypeKey($id),
                     'status' => 'validated',
-                    'type_id' => $type->id,
+                    'type_id' => $ticket_type->id,
                     'event_id' => $event->id,
                     'order_id' => $order->id,
-                ]);
-                $name = "/$ticket->key.pdf";
-                $path = $base_path.$name;
-                (new LaraTeX('latex.ticket'))->with([
-                    'event' => $event,
-                    'ticket' => $ticket,
-                    'ticket_type' => $type,
-                    'order' => $order,
-                ])->savePdf($path);
-                array_push($urls, "/storage/pdf".$name);
+                ]); 
             }
+
+            // Créer le chemin de stockage du pdf
+            $name = "/$order->number.pdf";
+            $path = $base_path.$name;
+
+            // Créer les lien d'accès au pdf
+            $tickets_url = "/storage/public/pdf".$name;
+
+            // Sauvegarder le pdf contenant les tickets
+            (new LaraTeX('latex.ticket'))->with([
+                'order' => $order,
+                'event' => $event,
+                'tickets' => $order->tickets,
+            ])->savePdf($path);
 
             // Si tout se passe bien, on valide la transaction
             DB::commit();
@@ -155,16 +232,17 @@ class OrderApiController extends Controller
             // On retourner une réponse JSON de succès
             return response()->json([
                 'message' => 'Order created successfully',
-                'urls' => $urls
+                'tickets_url' => $tickets_url,
             ], HttpStatus::CREATED);
         
         } catch (\Exception $e) {
+
             // En cas d'erreur, on annule la transaction
             DB::rollBack();
         
             // On retourner une réponse JSON avec le message d'erreur
             return response()->json([
-                'errors' => $e->getMessage()
+                'errors' => $e,
             ], HttpStatus::INTERNAL_SERVER_ERROR);
         }
     }

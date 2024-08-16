@@ -18,7 +18,18 @@ use Illuminate\Validation\ValidationException;
 class UserApiController extends Controller
 {
     /**
-     * Show the form for creating a new resource.
+     * @OA\Get(
+     *     path="/register",
+     *     summary="Show registration page",
+     *     tags={"Registrate to api form"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Registration page displayed",
+     *         @OA\MediaType(
+     *             mediaType="text/html"
+     *         )
+     *     )
+     * )
      */
     public function create()
     {
@@ -27,8 +38,44 @@ class UserApiController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     */
+     * @OA\Post(
+     *     path="/register",
+     *     summary="Register a new user",
+     *     tags={"Registrate to api"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"firstname", "lastname", "business", "town", "email", "address"},
+     *             @OA\Property(property="firstname", type="string", example="John"),
+     *             @OA\Property(property="lastname", type="string", example="Doe"),
+     *             @OA\Property(property="business", type="string", example="TechCorp"),
+     *             @OA\Property(property="town", type="string", example="Paris"),
+     *             @OA\Property(property="email", type="string", format="email", example="johndoe@example.com"),
+     *             @OA\Property(property="address", type="string", example="123 Main St")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User successfully registered and email sent",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Your account was successfully registered. Go to consult your email.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation errors",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\AdditionalProperties(type="string")
+     *             )
+     *         )
+     *     )
+     * )
+     */    
     public function store(Request $request)
     {
         // On valide le formulaire que nous reçevons.
@@ -73,8 +120,40 @@ class UserApiController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
+    * @OA\Post(
+    *     path="/login",
+    *     summary="Login a user and return an API token",
+    *     tags={"Login"},
+    *     @OA\RequestBody(
+    *         required=true,
+    *         @OA\JsonContent(
+    *             required={"email", "password"},
+    *             @OA\Property(property="email", type="string", format="email", example="johndoe@example.com"),
+    *             @OA\Property(property="password", type="string", example="password123")
+    *         )
+    *     ),
+    *     @OA\Response(
+    *         response=200,
+    *         description="Successful login",
+    *         @OA\JsonContent(
+    *             type="object",
+    *             @OA\Property(property="token", type="string", example="1|ABCDefGhijklmnopQrstuVwxyz1234567890")
+    *         )
+    *     ),
+    *     @OA\Response(
+    *         response=400,
+    *         description="Invalid credentials or validation errors",
+    *         @OA\JsonContent(
+    *             type="object",
+    *             @OA\Property(
+    *                 property="errors",
+    *                 type="object",
+    *                 @OA\AdditionalProperties(type="string", example="The provided credentials are incorrect.")
+    *             )
+    *         )
+    *     )
+    * )
+    */
     public function login(Request $request)
     {
         // On valide le formulaire que nous reçevons.
@@ -108,6 +187,31 @@ class UserApiController extends Controller
         ], HttpStatus::OK);    
     }
 
+
+    /**
+    * @OA\Post(
+    *     path="/logout",
+    *     summary="Logout the authenticated user",
+    *     tags={"Logout"},
+    *     security={{"sanctum": {}}},
+    *     @OA\Response(
+    *         response=200,
+    *         description="Logged out successfully",
+    *         @OA\JsonContent(
+    *             type="object",
+    *             @OA\Property(property="message", type="string", example="Logged out successfully")
+    *         )
+    *     ),
+    *     @OA\Response(
+    *         response=401,
+    *         description="Unauthenticated",
+    *         @OA\JsonContent(
+    *             type="object",
+    *             @OA\Property(property="message", type="string", example="Unauthenticated")
+    *         )
+    *     )
+    * )
+    */
     public function logout(Request $request)
     {
         // On détruit le token

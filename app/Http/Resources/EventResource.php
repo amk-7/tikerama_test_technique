@@ -24,6 +24,7 @@ class EventResource extends JsonResource
             'city' => $this->resource->city,
             'address' => $this->resource->address,
             'status' => $this->resource->status,
+            'ticketsTypes' => TicketTypeResource::collection($this->whenLoaded('typeTickets')),
         ];
     }
 }

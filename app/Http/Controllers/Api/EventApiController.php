@@ -14,7 +14,7 @@ class EventApiController extends Controller
     /**
      * @OA\Get(
      *     path="/events",
-     *     operationId="index",
+     *     operationId="EventApiController.index",
      *     tags={"Events"},
      *     summary="Get List Of Events",
      *     description="Returns a paginated list of events, ordered by date in descending order.",
@@ -113,6 +113,7 @@ class EventApiController extends Controller
 
         // On récupère les évenments ordonnée par date décroissant
         $events = Event::orderBy('date','desc')
+                        ->with('typeTickets')
                         ->paginate($perPage);
 
         // On retourne les évenments en utilisant une ressource
@@ -121,10 +122,10 @@ class EventApiController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/events",
-     *     operationId="index",
-     *     tags={"Events"},
-     *     summary="Get List Of Events",
+     *     path="/events/upcoming",
+     *     operationId="indexUpcoming",
+     *     tags={"Upcoming Events"},
+     *     summary="Get List Of Upcoming Events",
      *     description="Returns a paginated list of events, ordered by date in descending order.",
      *     @OA\Parameter(
      *         name="page",

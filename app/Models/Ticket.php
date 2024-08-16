@@ -23,9 +23,11 @@ class Ticket extends Model
         'created_on',
     ];
 
-    public function genarateKey()
+    protected static function booted(): void
     {
-        
+        static::created(function (Ticket $ticket) {
+            $ticket->ticketType->reduceRealQuantity(1);
+        });
     }
 
     public function event(): BelongsTo

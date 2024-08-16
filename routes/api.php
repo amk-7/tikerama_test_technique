@@ -28,7 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('/orders/validate/{order_intent_id}/{event_id}', [OrderApiController::class, 'store']);
     
-    Route::get('/orders/user/{user_id}', [OrderApiController::class, 'user_index']);
+    Route::get('/user/orders', [OrderApiController::class, 'index']);
 });
 
 

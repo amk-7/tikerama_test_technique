@@ -28,8 +28,99 @@ class OrdersIntentApiController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     */
+ * @OA\Post(
+ *     path="/orders/intent",
+ *     operationId="OrdersIntentApiController.store",
+ *     summary="Create a new order intent",
+ *     tags={"OrderIntents"},
+ *     security={{"sanctum":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Order intent created successfully",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(
+ *                 property="message",
+ *                 type="string",
+ *                 example="Order intent created successfully"
+ *             ),
+ *             @OA\Property(
+ *                 property="data",
+ *                 type="object",
+ *                 @OA\Property(
+ *                     property="id",
+ *                     type="integer",
+ *                     example=1
+ *                 ),
+ *                 @OA\Property(
+ *                     property="price",
+ *                     type="integer",
+ *                     example=1000
+ *                 ),
+ *                 @OA\Property(
+ *                     property="type",
+ *                     type="string",
+ *                     example="VIP"
+ *                 ),
+ *                 @OA\Property(
+ *                     property="user_email",
+ *                     type="string",
+ *                     format="email",
+ *                     example="user@example.com"
+ *                 ),
+ *                 @OA\Property(
+ *                     property="user_phone",
+ *                     type="string",
+ *                     example="1234567890"
+ *                 ),
+ *                 @OA\Property(
+ *                     property="expiration_date",
+ *                     type="string",
+ *                     format="date",
+ *                     example="2024-12-31"
+ *                 ),
+ *                 @OA\Property(
+ *                     property="created_at",
+ *                     type="string",
+ *                     format="date-time",
+ *                     example="2024-08-16T00:00:00Z"
+ *                 ),
+ *                 @OA\Property(
+ *                     property="updated_at",
+ *                     type="string",
+ *                     format="date-time",
+ *                     example="2024-08-16T00:00:00Z"
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Bad Request - Validation errors",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(
+ *                 property="errors",
+ *                 type="object"
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Internal Server Error - Exception occurred",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(
+ *                 property="errors",
+ *                 type="string"
+ *             )
+ *         )
+ *     )
+ * )
+ */
     public function store(Request $request)
     {
         // On crée un validateur pour le formulaire que nous reçevons.
@@ -37,8 +128,8 @@ class OrdersIntentApiController extends Controller
             $request->all(), 
             [
                 'price' => 'required|integer|max_digits:10',
-                'type' => 'required|string|max:50',
-                'user_email' => 'required|string|max:100|exist:tickets_types',
+                'type' => 'required|string|max:50|exists:tickets_types,name',
+                'user_email' => 'required|string|max:100',
                 'user_phone' => 'required|string|max:20',
                 'expiration_date' => 'required|date',
             ]
