@@ -19,7 +19,7 @@ class UserApiController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/register",
+     *     path="/",
      *     summary="Show registration page",
      *     tags={"Registrate to api form"},
      *     @OA\Response(
