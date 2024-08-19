@@ -12,8 +12,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [UserApiController::class, 'logout'])->name('logout');
     
+    Route::post('/login', [UserApiController::class, 'login'])->name('login');
+
     Route::get('/events', [EventApiController::class, 'index']);
-    
+
     Route::get('/events/upcoming', [EventApiController::class, 'indexUpcoming']);
         
     Route::get('/events/ticket/types/{event_id}', [TicketsTypeApiController::class, 'index']);
