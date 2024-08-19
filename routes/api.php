@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::post('/logout', [UserApiController::class, 'logout'])->name('logout');
+    Route::post('/logout', [UserApiController::class, 'logout']);
     
-    Route::post('/login', [UserApiController::class, 'login'])->name('login');
+    Route::post('/login', [UserApiController::class, 'login']);
 
     Route::get('/events', [EventApiController::class, 'index']);
 
